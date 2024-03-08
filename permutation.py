@@ -31,16 +31,17 @@ class Permutation:
 
 
     """
-    @pre: txt (encripted massage) of length of at least 2"""
+    @pre: txt (encrypted massage) of length of at least 2
+    @pre: model was already logged with LanguageModel.log_model()"""
     def get_energy(self,txt,model):
         import math
 
         txt = self.translate(txt)
 
-        eng = math.log(model.uni_dict[txt[0]],2)
+        eng = model.uni_dict[txt[0]]
         # initializing eng with probability of first char
 
         for i in range(len(txt)-1):
-            eng += math.log(model.bi_dict[txt[i:i+2]],2)
+            eng += model.bi_dict[txt[i:i+2]]
 
         return 0 - eng

@@ -8,6 +8,8 @@ class SimulatedAnnealing:
         self.cool_rate = cool_rate
 
     def run(self,perm,txt,model):
+        model.log_model() # log all values once, instead of repeatedly
+
         D = txt
         H = perm
         T = self.initemp
@@ -24,5 +26,8 @@ class SimulatedAnnealing:
             if r < p:
                 H = new_H
             T = T * self.cool_rate
+
+        model.de_log_model() # for good measures, returning model to pre-logged state
+
         return H
 

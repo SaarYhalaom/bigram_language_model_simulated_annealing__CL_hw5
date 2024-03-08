@@ -1,3 +1,4 @@
+import math
 import urllib.request
 
 import string
@@ -69,8 +70,8 @@ class LanguageModel:
     """takes a 2-tuple of dicts: (uni_count_dict, bi_count_dict)
     and re-writes (in-place) their info-s as MLE probs
     applies Laplace smoothing"""
-    def uni_count_to_MLE(self,dcts):
-        uni_count_dict, bi_count_dict = dcts
+    def uni_count_to_MLE(self,dicts):
+        uni_count_dict, bi_count_dict = dicts
 
         # getting overall char-count
         N = 0
@@ -94,3 +95,26 @@ class LanguageModel:
 
         self.uni_dict = uni_dict
         self.bi_dict = bi_dict
+        self.old_dicts = None #used in logging & de-logging model, see below
+
+    """turns every prob in a model to -log_2^(val),
+    used for simulated annealing optimization (not to calc log again every time)
+    stores a copy of old dictionaries as old_dicts for de-logging"""
+    def log_model(self):
+        logged_uni_dict = {}
+        logged_bi_dict = {}
+
+        for key in self.uni_dict:
+            logged_uni_dict[key] = math.log(self.uni_dict[key],2)
+        for key in self.bi_dict:
+            logged_bi_dict[key] = math.log(self.bi_dict[key],2)
+
+        self.old_dicts = (self.uni_dict, self.bi_dict)
+        self.uni_dict = logged_uni_dict
+        self.bi_dict = logged_bi_dict
+
+    """returning prob values to pre-logging, after log_model(self)
+    used when wrapping up simulated annealing"""
+    def de_log_model(self):
+        self.uni_dict, self.bi_dict = self.old_dicts
+        self.old_dicts = None #just for good measures and memory frugality
